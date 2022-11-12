@@ -1,28 +1,55 @@
 // @ts-check
 
 const express = require('express')
-const fs = require('fs')
+// const bodyParser = require('body-parser') // express.json() 으로 사용 가능
+
+const userRouter = express.Router()
 
 const app = express()
 
+app.use(express.json())
+
 const PORT = 4000
 
-app.use('/', async (req, res, next) => {
-  console.log('middleware 1')
-  const requestedAt = new Date()
-  const fileContent = await fs.promises.readFile('.gitignore')
+userRouter.get('/', (req, res) => {
+  res.send('User List')
+})
 
-  req.requestedAt = requestedAt
-  req.fileContent = fileContent
+USERS = {
+  15 : {
+    nickname: 'kim',
+  },
+  'kim': {
+    nickname: 'kkw',
+  },
+}
+
+userRouter.param('id', (req, res, next, value) => {
+  console.log('id param', value)
+  req.user = USERS[value]
   next()
 })
 
-/* ...middleware */
-
-app.use('/', (req, res, next) => {
-  console.log('middleware 2')
-  res.send(`requested at ${req.requestedAt}, file : ${req.fileContent}`)
+userRouter.get('/:id', (req, res) => {
+  console.log('userRouter get ID')
+  res.send(req.user)
 })
+
+userRouter.post('/', (req, res) => {
+  res.send('User register')
+})
+
+userRouter.post('/:id/nickname', (req, res) => {
+  // req.body: {'nickname': 'bar'}
+  const { user } = req
+  const { nickname } = req.body
+
+  user.nickname = nickname
+
+  res.send(`user nickname updated: ${nickname}`)
+})
+
+app.use('/users', userRouter)
 
 app.listen(PORT, () => {
   console.log(`The Express server is listening at port ${PORT}`)
