@@ -11,6 +11,7 @@ const userRouter = require('./routers/user')
 
 app.use('/users', userRouter)
 app.use('/public', express.static('src/public'))
+app.use('/uploads', express.static('uploads'))
 
 // error handling middleware
 app.use((err, req, res, next) => {

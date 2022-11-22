@@ -1,15 +1,20 @@
 // @ts-check
 
 const express = require('express')
+const multer = require('multer')
+
+const upload = multer({ dest: 'uploads/'})
 
 const router = express.Router()
 
 const USERS = {
   15: {
     nickname: 'nickname 15',
+    profileImageKey: undefined,
   },
   16: {
     nickname: 'nickname 16',
+    profileImageKey: undefined,
   },
 }
 
@@ -45,6 +50,9 @@ router.get('/:id', (req, res) => {
   } else if (resMimeType === 'html') {
     res.render('user-profile', {
       nickname: req.user.nickname,
+      userId: req.params.id,
+      // profileImageURL: '/uploads/bc2665d513c20048838d727f34ad4cf9',
+      profileImageURL: `/uploads/${req.user.profileImageKey}`,
     })
   }
 })
@@ -54,13 +62,21 @@ router.post('/', (req, res) => {
 })
 
 router.post('/:id/nickname', (req, res) => {
-  // req.body: {'nickname': 'bar'}
   const { user } = req
   const { nickname } = req.body
   
   user.nickname = nickname
   
   res.send(`user nickname updated: ${nickname}`)
+})
+
+router.post('/:id/profile', upload.single('profile'), (req, res, next) => {
+  const { user } = req
+  const { filename } = req.file
+
+  user.profileImageKey = filename
+
+  res.send(`user profile image uploaded: ${filename}`)
 })
 
 module.exports = router
